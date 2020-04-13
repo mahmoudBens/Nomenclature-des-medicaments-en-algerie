@@ -1,0 +1,15 @@
+{
+  "name": "Nomenclature-des-medicaments-en-algerie",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/kzelda/Nomenclature-des-medicaments-en-algerie.git",
+  "author": "kzelda <kzeldan64@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel ./src/index.html",
+    "build": "parcel build ./src/index.html --out-file ./dist/index.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  }
+}

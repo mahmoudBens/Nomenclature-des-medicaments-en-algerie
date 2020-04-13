@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nomenclature des medicaments en algerie</title>
+
+    <style>
+        body{
+            background-color: #eee;
+            font-size: 1.2rem;
+        }
+        h1{
+            text-align: center;
+        }
+        hr{
+            color:#eee
+        }
+        button{
+            padding: 5px 15px;
+            font-size: .8rem;
+        }
+        .hidden{
+            display: none!important;
+        }
+        .search-zone, .results-zone{
+            display: block;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        .search-input {
+            padding: 5px 20px;
+            width: 80%;
+            font-size: 1rem;
+            margin: 10px auto;
+            border: solid 1px #607D8B;
+        }
+        #results{
+            padding: 10px 20px;
+            width: 80%;
+            margin: 10px auto;
+        }
+        #results>li{
+            padding: 5px 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nomenclature des medicaments en algerie</h1>
+        <hr>
+        <div class="search-zone">            
+            <input id="medic" type="text" class="search-input" value="" placeholder="DCI / Médicament / Forme / Dosage">
+            <button id="btnSearch">Search</button>
+            <hr>
+            <button id="btnReset" >Reset</button>
+            <button id="btnLoad" title="Reload data from server">Reload data</button>
+        </div>
+        <div class="results-zone">
+            <ol id="results">
+            </ol>
+        </div>
+    </div>
+
+
+    <script>
+
+        (function(store){
+            
+            var medic = document.getElementById("medic");
+            var results = document.getElementById("results");
+
+            var btnSearch = document.getElementById("btnSearch");
+            var btnReset = document.getElementById("btnReset");
+            var btnLoad = document.getElementById("btnLoad");
+
+            var dci = "DENOMINATION_COMMUNE_INTERNATIONALE";
+            var mark = "NOM_DE_MARQUE";
+            var forme = "FORME";
+            var dosage = "DOSAGE";
+            var id = "ID";
+            var liste = "LISTE";
+            var labo = "LABORATOIRES_DETENTEUR_DE_LA_DECISION_DENREGISTREMENT";
+            //var urlJson = "https://raw.githubusercontent.com/mahmoudBens/Nomenclature-des-medicaments-en-algerie/master/medicament.json";
+            var urlJson = "medicament.json";
+            var data = {};
+
+            function debounce(func, wait, immediate) {
+                var timeout;
+                return function() {
+                    var context = this, args = arguments;
+                    var later = function() {
+                        timeout = null;
+                        if (!immediate) func.apply(context, args);
+                    };
+                    var callNow = immediate && !timeout;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                    if (callNow) func.apply(context, args);
+                };
+            };
+
+            function showAll(){
+                data = JSON.parse(store.data)[1].data;
+                results.innerHTML = "";
+                data.map(r => {
+                            var li = document.createElement("li");
+                            //li.className = "hidden";
+                            li.id = r[id];
+                            li.title = r[labo];
+                            li.innerText = `${r[dci]} | ${r[mark]} | ${r[forme]} | ${r[dosage]} | ${r[labo]}`;
+                            results.appendChild(li);
+                        });  
+            }
+
+            function fetchData(){
+                fetch(`${urlJson}?date=${Date.now()}`)
+                                .then(data => data.json())
+                                .then(json => {
+                                    store.setItem("data",JSON.stringify(json));
+                                    showAll();
+                                });
+            }
+
+            function msg(obj) {
+                var pre = document.createElement("pre");
+                pre.style.textAlign = "left";
+                pre.innerText = JSON.stringify(obj, null, '  ');
+                Swal.fire({
+                    title: obj[mark],
+                    html: pre.outerHTML,
+                    width: "auto"
+                });
+            }
+
+            var fnSearch = debounce(function(event){
+                
+                var ss = medic.value.toLowerCase().trim();
+
+                function found(item,col){
+                    return  item[col] && item[col].toLowerCase().trim().indexOf(ss) > -1
+                }
+
+                var filter = function(item){
+                    return  found(item,dci) || 
+                            found(item,mark) ||
+                            found(item,forme) ||
+                            found(item,dosage) ||
+                            found(item,liste) ||
+                            found(item,labo)
+                }                
+
+                var shown = data.filter(filter);
+                var hiddens = data.filter(d => !filter(d));
+
+                shown.map(r => {
+                    document.getElementById(r[id]).className = "";
+                });
+
+                hiddens.map(r => {
+                    document.getElementById(r[id]).className = "hidden";
+                });
+
+            },300);
+
+            // Events
+            medic.addEventListener('input', fnSearch);
+
+            btnSearch.addEventListener('click', fnSearch);
+
+            btnReset.addEventListener('click', _ => {
+                    if(medic.value.trim().length == 0) return;
+
+                    medic.value = "";                    
+                    fnSearch();
+            });
+
+            btnLoad.addEventListener('click',_ => {
+                results.innerHTML = "Loading ...";
+                fetchData();
+            });
+
+            results.addEventListener("click", _ => {
+              
+              if(_.target && _.target.tagName && _.target.tagName.toLowerCase() != "li"){
+                return;
+              }
+
+                var selected = data.filter(d => d[id] == _.target.id);
+
+                if(selected.length > 0){
+                    msg(selected[0]);    
+                }
+                
+            })
+            
+            if(!store.data){
+                fetchData();
+            }
+            else {
+                showAll();
+            }
+
+        })(window.localStorage);
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+</body>
+</html>
