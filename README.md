@@ -3,3 +3,11 @@ La nomenclature des médicaments en Algérie est une collection de données cont
 
 ## Source de données
 Extraite du fichier excel du ministère de santé.
+
+## source
+[http://www.sante.gov.dz/pharmacie/407-la-nomenclature.html](http://www.sante.gov.dz/pharmacie/407-la-nomenclature.html)
+
+## Excel
+Download from [sante.gov.dz](http://www.sante.gov.dz/images/pharmacie/nomenclature-au-31-Dcembre-2019.xlsx)
+<br>
+Download from [github](http://www.sante.gov.dz/images/pharmacie/nomenclature-au-31-Dcembre-2019.xlsx)
